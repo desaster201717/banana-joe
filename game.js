@@ -230,20 +230,16 @@ function movePlayer() {
 
     let moved = false;
 
-    if (keysPressed.ArrowUp) {
-        y -= STEP;
-        moved = true;
-    }
-    if (keysPressed.ArrowDown) {
-        y += STEP;
-        moved = true;
-    }
-    if (keysPressed.ArrowLeft) {
-        x -= STEP;
-        moved = true;
-    }
-    if (keysPressed.ArrowRight) {
-        x += STEP;
+    // Keyboard Movement
+    if (keysPressed.ArrowUp) { y -= STEP; moved = true; }
+    if (keysPressed.ArrowDown) { y += STEP; moved = true; }
+    if (keysPressed.ArrowLeft) { x -= STEP; moved = true; }
+    if (keysPressed.ArrowRight) { x += STEP; moved = true; }
+
+    // Joystick Movement
+    if (typeof joystickDeltaX !== 'undefined' && (joystickDeltaX !== 0 || joystickDeltaY !== 0)) {
+        x += joystickDeltaX * STEP;
+        y += joystickDeltaY * STEP;
         moved = true;
     }
 
@@ -287,29 +283,108 @@ document.addEventListener("keyup", (e) => {
     }
 });
 
-// Event Listeners for Touch Controls
-const addTouchListener = (btnId, key) => {
-    const btn = document.getElementById(btnId);
-    if (!btn) return;
+// Joystick State and Implementation
+let isDragging = false;
+let joystickDeltaX = 0;
+let joystickDeltaY = 0;
+let activeTouchId = null;
 
-    btn.addEventListener("touchstart", (e) => {
-        e.preventDefault(); // Prevent ghost clicks
-        keysPressed[key] = true;
-    });
-    btn.addEventListener("touchend", (e) => {
+const joystickZone = document.getElementById("joystick-zone");
+const joystickBase = document.getElementById("joystick-base");
+const joystickStick = document.getElementById("joystick-stick");
+
+function showJoystickIfTouch() {
+    if (('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (navigator.msMaxTouchPoints > 0)) {
+        joystickZone.style.display = "block";
+    }
+}
+
+function updateJoystick(clientX, clientY) {
+    if(!joystickBase || !joystickStick) return;
+    const rect = joystickBase.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    
+    let dx = clientX - centerX;
+    let dy = clientY - centerY;
+    
+    const maxDist = rect.width / 2;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    
+    if (distance > maxDist) {
+        dx = (dx / distance) * maxDist;
+        dy = (dy / distance) * maxDist;
+    }
+    
+    joystickStick.style.transform = `translate(${dx}px, ${dy}px)`;
+    
+    joystickDeltaX = dx / maxDist; // range -1 to 1
+    joystickDeltaY = dy / maxDist; // range -1 to 1
+}
+
+function resetJoystick() {
+    if(joystickStick) {
+        joystickStick.style.transform = `translate(0px, 0px)`;
+    }
+    joystickDeltaX = 0;
+    joystickDeltaY = 0;
+}
+
+if(joystickZone) {
+    joystickZone.addEventListener("touchstart", (e) => {
         e.preventDefault();
-        keysPressed[key] = false;
-    });
-    // Mouse fallback for testing on desktop with mouse
-    btn.addEventListener("mousedown", () => keysPressed[key] = true);
-    btn.addEventListener("mouseup", () => keysPressed[key] = false);
-    btn.addEventListener("mouseleave", () => keysPressed[key] = false);
-};
+        if (activeTouchId !== null) return;
+        const touch = e.changedTouches[0];
+        activeTouchId = touch.identifier;
+        isDragging = true;
+        updateJoystick(touch.clientX, touch.clientY);
+    }, { passive: false });
 
-addTouchListener("up-btn", "ArrowUp");
-addTouchListener("down-btn", "ArrowDown");
-addTouchListener("left-btn", "ArrowLeft");
-addTouchListener("right-btn", "ArrowRight");
+    joystickZone.addEventListener("touchmove", (e) => {
+        e.preventDefault();
+        if (!isDragging) return;
+        for (let i = 0; i < e.changedTouches.length; i++) {
+            const touch = e.changedTouches[i];
+            if (touch.identifier === activeTouchId) {
+                updateJoystick(touch.clientX, touch.clientY);
+                break;
+            }
+        }
+    }, { passive: false });
+
+    const handleTouchEnd = (e) => {
+        e.preventDefault();
+        for (let i = 0; i < e.changedTouches.length; i++) {
+            const touch = e.changedTouches[i];
+            if (touch.identifier === activeTouchId) {
+                isDragging = false;
+                activeTouchId = null;
+                resetJoystick();
+                break;
+            }
+        }
+    };
+
+    joystickZone.addEventListener("touchend", handleTouchEnd, { passive: false });
+    joystickZone.addEventListener("touchcancel", handleTouchEnd, { passive: false });
+
+    // Mouse fallback for desktop testing
+    joystickZone.addEventListener("mousedown", (e) => {
+        isDragging = true;
+        updateJoystick(e.clientX, e.clientY);
+    });
+    document.addEventListener("mousemove", (e) => {
+        if (isDragging) {
+            updateJoystick(e.clientX, e.clientY);
+        }
+    });
+    document.addEventListener("mouseup", () => {
+        if (isDragging) {
+            isDragging = false;
+            resetJoystick();
+        }
+    });
+}
 
 // Fullscreen Button
 document.getElementById("fullscreen-btn").addEventListener("click", () => {
@@ -324,6 +399,7 @@ document.getElementById("fullscreen-btn").addEventListener("click", () => {
 
 // Init
 window.onload = () => {
+    if (typeof showJoystickIfTouch === 'function') { showJoystickIfTouch(); }
     updateStepSize();
     centerPlayer();
     updateUI();

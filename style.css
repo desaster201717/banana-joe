@@ -128,69 +128,47 @@ body {
     opacity: 1;
 }
 
-#controls {
+/* Joystick Controls */
+#joystick-zone {
     position: absolute;
     right: 5vmin;
     bottom: 5vmin;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    width: clamp(100px, 20vmin, 200px);
+    height: clamp(100px, 20vmin, 200px);
+    display: none; /* Shown via JS on touch devices */
     z-index: 50;
-    /* Only show on touch devices usually, but for now we keep it always or use media query */
-}
-
-@media (hover: hover) and (pointer: fine) {
-
-    /* Hide touch controls on devices with a mouse (PC) where keyboard is preferred */
-    #controls {
-        display: none;
-    }
+    touch-action: none; /* Critical for custom touch handling */
 }
 
 /* Tablet adjustments */
 @media (min-width: 600px) and (max-width: 1023px) {
-    #controls {
+    #joystick-zone {
         right: 4vmin;
         bottom: 4vmin;
     }
 }
 
-.row {
-    display: flex;
-    justify-content: space-between;
-    width: 32vmin;
-    /* scalable width for D-pad */
+#joystick-base {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.4);
+    border: 3px solid rgba(0, 0, 0, 0.6);
+    border-radius: 50%;
+    box-sizing: border-box;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
 }
 
-#controls button {
-    opacity: 0.4;
-    width: 10vmin;
-    height: 10vmin;
-    background-color: white;
-    border: 2px solid black;
-    border-radius: 10px;
-    font-weight: bold;
-    cursor: pointer;
-    touch-action: manipulation;
-}
-
-#controls button:active {
-    opacity: 0.8;
-    background-color: #ddd;
-}
-
-#up-btn {
-    order: -1;
-    margin-bottom: 5px;
-}
-
-/* Specific margins for alignment */
-#left-btn {
-    margin-right: 1vmin;
-}
-
-#right-btn {
-    margin-left: 1vmin;
+#joystick-stick {
+    position: absolute;
+    width: 50%;
+    height: 50%;
+    background-color: rgba(0, 0, 0, 0.8);
+    border-radius: 50%;
+    top: 25%;
+    left: 25%;
+    box-shadow: 0 0 5px rgba(255,255,255,0.5);
+    /* We handle transform in JS, no transition needed to avoid lag */
 }
 
 /* Start Screen */
