@@ -11,6 +11,9 @@ const startScreen = document.getElementById("startScreen");
 const playerNameInput = document.getElementById("playerNameInput");
 const startBtn = document.getElementById("start-btn");
 const highscoreListElement = document.getElementById("highscoreList");
+const showHighscoresBtn = document.getElementById("show-highscores-btn");
+const startHighscoreContainer = document.getElementById("startHighscoreContainer");
+const startHighscoreList = document.getElementById("startHighscoreList");
 
 let playerName = "";
 
@@ -122,14 +125,15 @@ function checkCollisions() {
 function collectTarget(targetElement, index) {
     // Remove from DOM and Array
     targetElement.remove();
-    targets.splice(index, 1);
+    targets.splic
+    e(index, 1);
 
     score++;
     targetsHit++;
     updateUI();
 
     // Difficulty Increase
-    if (targetsHit > 0 && targetsHit % 5 === 0 && spawnTime > 1000) {
+    if (targetsHit > 0 && targetsHit % 5 === 0 && spawnTime > 500) {
         spawnTime -= 500;
         updateUI(); // Update spawn time display
     }
@@ -161,29 +165,53 @@ function triggerGameOver() {
     saveAndLoadHighscores(playerName, score);
 }
 
-async function saveAndLoadHighscores(name, newScore) {
+async function fetchHighscores() {
     if (JSONBIN_BIN_ID === "YOUR_BIN_ID") {
-        highscoreListElement.innerHTML = "<li>Bitte konfiguriere JSONBin API Keys in game.js!</li>";
+        throw new Error("Bitte konfiguriere JSONBin API Keys!");
+    }
+    let response = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`, {
+        headers: { 'X-Master-Key': JSONBIN_API_KEY }
+    });
+    let data = await response.json();
+    return data.record.highscores || [];
+}
+
+function renderHighscores(highscores, listElement) {
+    listElement.innerHTML = "";
+    if (highscores.length === 0) {
+        listElement.innerHTML = "<li>Keine Highscores gefunden.</li>";
         return;
     }
+    highscores.forEach((entry, index) => {
+        const li = document.createElement("li");
+        const rank = (index + 1) + ".";
 
+        const spanLeft = document.createElement("span");
+        spanLeft.textContent = `${rank} ${entry.name}`;
+
+        const spanRight = document.createElement("span");
+        spanRight.textContent = `${entry.score} Pkt`;
+        spanRight.style.color = "yellow";
+        spanRight.style.fontWeight = "bold";
+
+        li.appendChild(spanLeft);
+        li.appendChild(spanRight);
+        listElement.appendChild(li);
+    });
+}
+
+async function saveAndLoadHighscores(name, newScore) {
     try {
-        // 1. Fetch current highscores
-        let response = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`, {
-            headers: { 'X-Master-Key': JSONBIN_API_KEY }
-        });
+        let highscores = await fetchHighscores();
 
-        let data = await response.json();
-        let highscores = data.record.highscores || [];
-
-        // 2. Add new score and sort
+        // Add new score and sort
         highscores.push({ name: name, score: newScore });
         highscores.sort((a, b) => b.score - a.score);
 
         // Keep only top 10
         highscores = highscores.slice(0, 10);
 
-        // 3. Save back to API
+        // Save back to API
         await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`, {
             method: 'PUT',
             headers: {
@@ -193,30 +221,29 @@ async function saveAndLoadHighscores(name, newScore) {
             body: JSON.stringify({ highscores: highscores })
         });
 
-        // 4. Render the list
-        highscoreListElement.innerHTML = "";
-        highscores.forEach((entry, index) => {
-            const li = document.createElement("li");
-            const rank = (index + 1) + ".";
-
-            const spanLeft = document.createElement("span");
-            spanLeft.textContent = `${rank} ${entry.name}`;
-
-            const spanRight = document.createElement("span");
-            spanRight.textContent = `${entry.score} Pkt`;
-            spanRight.style.color = "yellow";
-            spanRight.style.fontWeight = "bold";
-
-            li.appendChild(spanLeft);
-            li.appendChild(spanRight);
-            highscoreListElement.appendChild(li);
-        });
+        // Render the list
+        renderHighscores(highscores, highscoreListElement);
 
     } catch (error) {
         console.error("Fehler beim Laden/Speichern der Highscores:", error);
         highscoreListElement.innerHTML = "<li>Fehler beim Verbinden zur Datenbank.</li>";
     }
 }
+
+showHighscoresBtn.addEventListener("click", async () => {
+    startHighscoreContainer.style.display = "block";
+    startHighscoreList.innerHTML = "<li>Laden...</li>";
+    showHighscoresBtn.disabled = true;
+
+    try {
+        let highscores = await fetchHighscores();
+        renderHighscores(highscores, startHighscoreList);
+    } catch (error) {
+        startHighscoreList.innerHTML = `<li>Fehler: ${error.message}</li>`;
+    } finally {
+        showHighscoresBtn.disabled = false;
+    }
+});
 
 // Movement Logic
 function movePlayer() {
@@ -300,37 +327,37 @@ function showJoystickIfTouch() {
 }
 
 function updateJoystick(clientX, clientY) {
-    if(!joystickBase || !joystickStick) return;
+    if (!joystickBase || !joystickStick) return;
     const rect = joystickBase.getBoundingClientRect();
     const centerX = rect.left + rect.width / 2;
     const centerY = rect.top + rect.height / 2;
-    
+
     let dx = clientX - centerX;
     let dy = clientY - centerY;
-    
+
     const maxDist = rect.width / 2;
     const distance = Math.sqrt(dx * dx + dy * dy);
-    
+
     if (distance > maxDist) {
         dx = (dx / distance) * maxDist;
         dy = (dy / distance) * maxDist;
     }
-    
+
     joystickStick.style.transform = `translate(${dx}px, ${dy}px)`;
-    
+
     joystickDeltaX = dx / maxDist; // range -1 to 1
     joystickDeltaY = dy / maxDist; // range -1 to 1
 }
 
 function resetJoystick() {
-    if(joystickStick) {
+    if (joystickStick) {
         joystickStick.style.transform = `translate(0px, 0px)`;
     }
     joystickDeltaX = 0;
     joystickDeltaY = 0;
 }
 
-if(joystickZone) {
+if (joystickZone) {
     joystickZone.addEventListener("touchstart", (e) => {
         e.preventDefault();
         if (activeTouchId !== null) return;
