@@ -192,3 +192,77 @@ body {
 #right-btn {
     margin-left: 1vmin;
 }
+
+/* Start Screen */
+#startScreen {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    background-color: rgba(0, 0, 0, 0.9);
+    padding: 40px;
+    border-radius: 20px;
+    z-index: 2000;
+    color: white;
+    box-shadow: 0 0 20px yellow;
+    display: none; /* Initial hidden, wird in JS gesteuert */
+}
+
+#startScreen h1 {
+    color: yellow;
+    font-size: clamp(32px, 8vmin, 72px);
+    margin: 0 0 20px 0;
+}
+
+#playerNameInput {
+    font-size: clamp(18px, 4vmin, 24px);
+    padding: 1vmin;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    border: none;
+    text-align: center;
+    width: 60%;
+}
+
+#start-btn {
+    font-size: clamp(18px, 4vmin, 32px);
+    padding: 1.5vmin 4vmin;
+    cursor: pointer;
+    background-color: #228B22;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    margin-top: 10px;
+}
+
+/* Highscore List */
+#highscoreContainer {
+    margin-top: 20px;
+    background-color: rgba(255, 255, 255, 0.1);
+    padding: 15px;
+    border-radius: 10px;
+}
+
+#highscoreContainer h2 {
+    margin-top: 0;
+    font-size: clamp(20px, 5vmin, 32px);
+    color: yellow;
+}
+
+#highscoreList {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    text-align: left;
+    max-height: 25vh;
+    overflow-y: auto;
+}
+
+#highscoreList li {
+    font-size: clamp(16px, 3vmin, 24px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 5px 0;
+    display: flex;
+    justify-content: space-between;
+}

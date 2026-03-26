@@ -6,6 +6,18 @@ const spawnTimeDisplay = document.getElementById("spawnTime");
 const gameOverScreen = document.getElementById("gameOver");
 const finalScoreDisplay = document.getElementById("finalScore");
 
+// Highscore UI
+const startScreen = document.getElementById("startScreen");
+const playerNameInput = document.getElementById("playerNameInput");
+const startBtn = document.getElementById("start-btn");
+const highscoreListElement = document.getElementById("highscoreList");
+
+let playerName = "";
+
+// JSONBin.io Config (Nutzer muss dies ausfüllen!)
+const JSONBIN_BIN_ID = "69c5041db7ec241ddca5830d";
+const JSONBIN_API_KEY = "$2a$10$tnWV4DXh8YcdttorcyL4nun1J83HLikAD0OU8R41xkeDPklNyVoMS";
+
 let score = 0;
 let targets = []; // Array of active target elements
 let isGameOver = false;
@@ -137,12 +149,73 @@ function updateUI() {
 
 function triggerGameOver() {
     isGameOver = true;
-    gameOverScreen.style.display = "block";
-    finalScoreDisplay.textContent = `Score: ${score}`;
 
     // Stop all movement
     clearInterval(movementInterval);
     movementInterval = null;
+
+    gameOverScreen.style.display = "block";
+    finalScoreDisplay.textContent = `Score: ${score}`;
+    highscoreListElement.innerHTML = "<li>Speichere & Lade Highscores...</li>";
+
+    saveAndLoadHighscores(playerName, score);
+}
+
+async function saveAndLoadHighscores(name, newScore) {
+    if (JSONBIN_BIN_ID === "YOUR_BIN_ID") {
+        highscoreListElement.innerHTML = "<li>Bitte konfiguriere JSONBin API Keys in game.js!</li>";
+        return;
+    }
+
+    try {
+        // 1. Fetch current highscores
+        let response = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`, {
+            headers: { 'X-Access-Key': JSONBIN_API_KEY }
+        });
+
+        let data = await response.json();
+        let highscores = data.record.highscores || [];
+
+        // 2. Add new score and sort
+        highscores.push({ name: name, score: newScore });
+        highscores.sort((a, b) => b.score - a.score);
+
+        // Keep only top 10
+        highscores = highscores.slice(0, 10);
+
+        // 3. Save back to API
+        await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Access-Key': JSONBIN_API_KEY
+            },
+            body: JSON.stringify({ highscores: highscores })
+        });
+
+        // 4. Render the list
+        highscoreListElement.innerHTML = "";
+        highscores.forEach((entry, index) => {
+            const li = document.createElement("li");
+            const rank = (index + 1) + ".";
+
+            const spanLeft = document.createElement("span");
+            spanLeft.textContent = `${rank} ${entry.name}`;
+
+            const spanRight = document.createElement("span");
+            spanRight.textContent = `${entry.score} Pkt`;
+            spanRight.style.color = "yellow";
+            spanRight.style.fontWeight = "bold";
+
+            li.appendChild(spanLeft);
+            li.appendChild(spanRight);
+            highscoreListElement.appendChild(li);
+        });
+
+    } catch (error) {
+        console.error("Fehler beim Laden/Speichern der Highscores:", error);
+        highscoreListElement.innerHTML = "<li>Fehler beim Verbinden zur Datenbank.</li>";
+    }
 }
 
 // Movement Logic
@@ -186,7 +259,7 @@ function movePlayer() {
     }
 }
 
-// Start Game Loop
+// Start Game Loop (nun init nur setup)
 function startGame() {
     updateStepSize();
     centerPlayer();
@@ -250,7 +323,25 @@ document.getElementById("fullscreen-btn").addEventListener("click", () => {
 });
 
 // Init
-window.onload = startGame;
+window.onload = () => {
+    updateStepSize();
+    centerPlayer();
+    updateUI();
+    startScreen.style.display = "block"; // Zeige Name-Eingabe Screen
+};
+
+// Button Listener für StartScreen
+startBtn.addEventListener("click", () => {
+    const name = playerNameInput.value.trim();
+    if (name.length > 0) {
+        playerName = name;
+        startScreen.style.display = "none";
+        startGame(); // Startet das eigentliche Level
+    } else {
+        alert("Bitte gib deinen Namen ein!");
+    }
+});
+
 window.addEventListener("resize", () => {
     centerPlayer();
     updateStepSize();

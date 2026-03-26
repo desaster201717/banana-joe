@@ -18,6 +18,14 @@
             src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/278796973&color=%23ff5500&auto_play=true&hide_related=true&show_comments=false&show_user=false&show_reposts=false&show_teaser=false&visual=false"></iframe>
     </div>
 
+    <!-- Start Screen -->
+    <div id="startScreen">
+        <h1>BananaJoe</h1>
+        <p>Bitte gib deinen Namen ein:</p>
+        <input type="text" id="playerNameInput" placeholder="Dein Name" maxlength="15"><br>
+        <button id="start-btn">Spiel starten</button>
+    </div>
+
     <!-- Game Container -->
     <div id="container">
         <div id="player"></div>
@@ -32,6 +40,14 @@
     <div id="gameOver">
         <h1>Game Over</h1>
         <div id="finalScore" style="font-size: 24px;"></div>
+        
+        <div id="highscoreContainer">
+            <h2>Top 10 Highscores</h2>
+            <ul id="highscoreList">
+                <li>Laden...</li>
+            </ul>
+        </div>
+
         <button onclick="location.reload()">Neustart</button>
     </div>
 
