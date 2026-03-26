@@ -4,15 +4,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>BananaJoe</title>
+    <title>BananaJoe | Modern Game</title>
     <link rel="stylesheet" href="style.css">
+    <!-- Meta for SEO -->
+    <meta name="description" content="BananaJoe - A fast-paced modern web game. Collect bananas, dodge nothing, and get the highscore!">
 </head>
 
 <body>
 
     <!-- Music Layer -->
     <div id="soundCloudLayer">
-        <!-- Hidden iframe for music (per user original code) -->
         <iframe scrolling="no" frameborder="no" allow="autoplay"
             src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/278796973&color=%23ff5500&auto_play=true&hide_related=true&show_comments=false&show_user=false&show_reposts=false&show_teaser=false&visual=false"></iframe>
     </div>
@@ -21,16 +22,15 @@
     <button id="fullscreen-btn">⛶ Vollbild</button>
 
     <!-- Start Screen -->
-    <div id="startScreen">
+    <div id="startScreen" class="glass">
         <h1>BananaJoe</h1>
-        <p>Bitte gib deinen Namen ein:</p>
-        <input type="text" id="playerNameInput" placeholder="Dein Name" maxlength="15"><br>
-        <button id="start-btn">Spiel starten</button>
-        <br>
-        <button id="show-highscores-btn">Highscores anzeigen</button>
+        <p>Willkommen zurück! Bitte gib deinen Namen ein:</p>
+        <input type="text" id="playerNameInput" placeholder="Dein Spielername" maxlength="15">
+        <button id="start-btn">Join Game</button>
+        <button id="show-highscores-btn">Hall of Fame</button>
         
         <div id="startHighscoreContainer" style="display: none;">
-            <h2>Top 10 Highscores</h2>
+            <h2>Global Legends</h2>
             <ul id="startHighscoreList">
                 <li>Laden...</li>
             </ul>
@@ -40,29 +40,28 @@
     <!-- Game Container -->
     <div id="container">
         <div id="player"></div>
-        <!-- Targets are spawned dynamically here -->
     </div>
 
-    <!-- UI Elements -->
+    <!-- HUD -->
     <div id="score">Score: 0</div>
-    <div id="spawnTime">Spawn Time: 5s</div>
+    <div id="spawnTime">Spawn Time: 2.5s <br> Active: 0/10</div>
 
     <!-- Game Over Screen -->
-    <div id="gameOver">
-        <h1>Game Over</h1>
-        <div id="finalScore" style="font-size: 24px;"></div>
+    <div id="gameOver" class="glass">
+        <h1>Busted!</h1>
+        <div id="finalScore" style="font-size: 32px; color: var(--primary-color); margin-bottom: 20px;"></div>
         
         <div id="highscoreContainer">
-            <h2>Top 10 Highscores</h2>
+            <h2>Leaderboard</h2>
             <ul id="highscoreList">
                 <li>Laden...</li>
             </ul>
         </div>
 
-        <button onclick="location.reload()">Neustart</button>
+        <button style="margin-top: 30px; background: var(--accent-color); color: white;" onclick="location.reload()">Noch einmal</button>
     </div>
 
-    <!-- Touch Controls (Virtual Joystick) -->
+    <!-- Touch Controls -->
     <div id="joystick-zone">
         <div id="joystick-base">
             <div id="joystick-stick"></div>
