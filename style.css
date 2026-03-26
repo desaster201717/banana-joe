@@ -139,9 +139,9 @@ body {
     /* Only show on touch devices usually, but for now we keep it always or use media query */
 }
 
-@media (min-width: 1024px) {
+@media (hover: hover) and (pointer: fine) {
 
-    /* Hide touch controls on large screens (PC) where keyboard is preferred */
+    /* Hide touch controls on devices with a mouse (PC) where keyboard is preferred */
     #controls {
         display: none;
     }
