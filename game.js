@@ -24,7 +24,7 @@ const JSONBIN_API_KEY = "$2a$10$tnWV4DXh8YcdttorcyL4nun1J83HLikAD0OU8R41xkeDPklN
 let score = 0;
 let targets = []; // Array of active target elements
 let isGameOver = false;
-let spawnTime = 3000;
+let spawnTime = 2500;
 let lastSpawnTime = 0;
 let targetsHit = 0; // Fixed initialization to 0
 let movementInterval = null;
@@ -35,8 +35,8 @@ const MOVE_INTERVAL_MS = 30; // Smoother movement
 
 function updateStepSize() {
     // Make the step size consistent: feels fast enough on mobile, not too fast on PC
-    // Minimum 15px per interval, gently scales up on very wide screens, max 22px
-    STEP = Math.max(15, Math.min(container.clientWidth * 0.012, 22));
+    // Adjusted by ~10% for both ends per user request
+    STEP = Math.max(13.5, Math.min(container.clientWidth * 0.013, 30));
 }
 
 // Input State
@@ -133,8 +133,8 @@ function collectTarget(targetElement, index) {
     updateUI();
 
     // Difficulty Increase
-    if (targetsHit > 0 && targetsHit % 5 === 0 && spawnTime > 500) {
-        spawnTime -= 500;
+    if (targetsHit > 0 && targetsHit % 5 === 0 && spawnTime > 750) {
+        spawnTime = Math.max(750, spawnTime - 500);
         updateUI(); // Update spawn time display
     }
 }
