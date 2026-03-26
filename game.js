@@ -170,7 +170,7 @@ async function saveAndLoadHighscores(name, newScore) {
     try {
         // 1. Fetch current highscores
         let response = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`, {
-            headers: { 'X-Access-Key': JSONBIN_API_KEY }
+            headers: { 'X-Master-Key': JSONBIN_API_KEY }
         });
 
         let data = await response.json();
@@ -188,7 +188,7 @@ async function saveAndLoadHighscores(name, newScore) {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
-                'X-Access-Key': JSONBIN_API_KEY
+                'X-Master-Key': JSONBIN_API_KEY
             },
             body: JSON.stringify({ highscores: highscores })
         });
