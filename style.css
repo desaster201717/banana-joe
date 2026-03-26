@@ -1,0 +1,194 @@
+body {
+    width: 100vw;
+    height: 100vh;
+    background-image: url(https://i0.wp.com/sarablog.gaulbachtal.de/wp-content/uploads/2019/01/wp-15488128694218836152123104595614.jpg?ssl=1);
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+    overflow: hidden;
+    margin: 0;
+    font-family: Arial, sans-serif;
+    touch-action: none;
+    /* Prevent zooming/scrolling on mobile */
+}
+
+#soundCloudLayer {
+    position: absolute;
+    z-index: 100;
+    top: 10px;
+    left: 10px;
+    opacity: 0.8;
+}
+
+#soundCloudLayer iframe {
+    width: 100px;
+    height: 20px;
+    opacity: 0.01;
+    /* Almost invisible but present */
+    position: absolute;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+}
+
+#container {
+    width: 95%;
+    height: 95%;
+    background-color: rgba(34, 139, 34, 0.8);
+    /* ForestGreen with transparency */
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border: 2px solid #000;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    overflow: hidden;
+    /* Keep everything inside */
+}
+
+#player {
+    width: 8vmin;
+    height: 9vmin;
+    background-color: blue;
+    position: absolute;
+    border-radius: 50%;
+    background-image: url(https://www.dire.it/wp-content/uploads/2020/10/bud-spencer2-1.jpg);
+    background-repeat: no-repeat;
+    background-size: cover;
+    z-index: 10;
+    transition: transform 0.1s;
+}
+
+.target {
+    width: 7vmin;
+    height: 7vmin;
+    background-color: red;
+    position: absolute;
+    background-image: url(https://www.wissenschaft.de/wp-content/uploads/2/1/21-03-bananen.jpg);
+    background-repeat: no-repeat;
+    background-size: cover;
+    border-radius: 50%;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+}
+
+#score {
+    position: absolute;
+    right: 3vmin;
+    top: 3vmin;
+    font-size: clamp(20px, 4vmin, 36px);
+    font-weight: bold;
+    color: white;
+    text-shadow: 1px 1px 2px black;
+    z-index: 20;
+}
+
+#spawnTime {
+    position: absolute;
+    right: 3vmin;
+    bottom: 3vmin;
+    font-size: clamp(14px, 3vmin, 24px);
+    color: white;
+    text-shadow: 1px 1px 2px black;
+    z-index: 20;
+}
+
+#gameOver {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    background-color: rgba(0, 0, 0, 0.9);
+    padding: 40px;
+    border-radius: 20px;
+    display: none;
+    z-index: 1000;
+    color: white;
+    box-shadow: 0 0 20px red;
+}
+
+#gameOver h1 {
+    color: red;
+    font-size: clamp(32px, 8vmin, 72px);
+    margin: 0 0 20px 0;
+}
+
+#gameOver button {
+    font-size: clamp(18px, 4vmin, 32px);
+    padding: 1.5vmin 4vmin;
+    cursor: pointer;
+    background-color: #228B22;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    margin-top: 20px;
+    width: auto;
+    height: auto;
+    opacity: 1;
+}
+
+#controls {
+    position: absolute;
+    right: 5vmin;
+    bottom: 5vmin;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 50;
+    /* Only show on touch devices usually, but for now we keep it always or use media query */
+}
+
+@media (min-width: 1024px) {
+
+    /* Hide touch controls on large screens (PC) where keyboard is preferred */
+    #controls {
+        display: none;
+    }
+}
+
+/* Tablet adjustments */
+@media (min-width: 600px) and (max-width: 1023px) {
+    #controls {
+        right: 4vmin;
+        bottom: 4vmin;
+    }
+}
+
+.row {
+    display: flex;
+    justify-content: space-between;
+    width: 32vmin;
+    /* scalable width for D-pad */
+}
+
+#controls button {
+    opacity: 0.4;
+    width: 10vmin;
+    height: 10vmin;
+    background-color: white;
+    border: 2px solid black;
+    border-radius: 10px;
+    font-weight: bold;
+    cursor: pointer;
+    touch-action: manipulation;
+}
+
+#controls button:active {
+    opacity: 0.8;
+    background-color: #ddd;
+}
+
+#up-btn {
+    order: -1;
+    margin-bottom: 5px;
+}
+
+/* Specific margins for alignment */
+#left-btn {
+    margin-right: 1vmin;
+}
+
+#right-btn {
+    margin-left: 1vmin;
+}
