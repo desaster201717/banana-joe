@@ -19,8 +19,9 @@ let STEP = 10;
 const MOVE_INTERVAL_MS = 30; // Smoother movement
 
 function updateStepSize() {
-    // Calculate movement step relative to screen width (e.g. 1.5% of width per interval)
-    STEP = Math.max(container.clientWidth * 0.015, 5);
+    // Make the step size consistent: feels fast enough on mobile, not too fast on PC
+    // Minimum 15px per interval, gently scales up on very wide screens, max 22px
+    STEP = Math.max(15, Math.min(container.clientWidth * 0.012, 22));
 }
 
 // Input State

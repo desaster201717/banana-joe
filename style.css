@@ -48,8 +48,8 @@ body {
 }
 
 #player {
-    width: 8vmin;
-    height: 9vmin;
+    width: clamp(45px, 12vw, 55px);
+    height: clamp(50px, 14vw, 65px);
     background-color: blue;
     position: absolute;
     border-radius: 50%;
@@ -61,8 +61,8 @@ body {
 }
 
 .target {
-    width: 7vmin;
-    height: 7vmin;
+    width: clamp(35px, 10vw, 48px);
+    height: clamp(35px, 10vw, 48px);
     background-color: red;
     position: absolute;
     background-image: url(https://www.wissenschaft.de/wp-content/uploads/2/1/21-03-bananen.jpg);
