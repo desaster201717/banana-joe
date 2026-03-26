@@ -125,8 +125,8 @@ function checkCollisions() {
 function collectTarget(targetElement, index) {
     // Remove from DOM and Array
     targetElement.remove();
-    targets.splic
-    e(index, 1);
+    targets.splice
+        (index, 1);
 
     score++;
     targetsHit++;
