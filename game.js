@@ -316,8 +316,8 @@ class BananaJoe {
         this.targetsHit++;
         
         // Progressive difficulty increase
-        if (this.targetsHit % 4 === 0 && this.currentSpawnRate > 350) {
-            this.currentSpawnRate = Math.max(350, this.currentSpawnRate - 400);
+        if (this.targetsHit % 4 === 0 && this.currentSpawnRate > 500) {
+            this.currentSpawnRate = Math.max(500, this.currentSpawnRate - 400);
         }
         
         this.updateUI();
