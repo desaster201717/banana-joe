@@ -72,10 +72,12 @@ class BananaJoe {
         this.playerH = this.playerElem.offsetHeight;
         
         // Dynamic step size (speed) - Balanced for different screen sizes
-        // On PC (large width), we increase speed to cover distances.
-        // On Mobile (small width), we decrease speed to increase challenge.
-        this.stepSize = 0.22 + (Math.max(0, this.containerW - 400) * 0.0016);
-        this.stepSize = Math.min(this.stepSize, 2.0); // Cap max speed
+        // We want a consistent time to cross the screen across devices.
+        // Approx. 1.1 seconds to cross the container width seems to be the sweet spot.
+        this.stepSize = this.containerW / 1100;
+
+        // Ensure a reasonable minimum and maximum speed
+        this.stepSize = Math.max(0.35, Math.min(this.stepSize, 2.2));
     }
 
     centerPlayer() {
@@ -256,7 +258,11 @@ class BananaJoe {
     }
 
     spawnObstacle() {
-        if (this.obstacles.length >= 15) return;
+        // Limit to 5 obstacles, remove oldest if limit exceeded (FIFO)
+        if (this.obstacles.length >= 5) {
+            const oldest = this.obstacles.shift();
+            oldest.elem.remove();
+        }
 
         const obs = {
             id: Date.now() + Math.random(),
