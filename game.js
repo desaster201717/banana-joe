@@ -246,8 +246,8 @@ class BananaJoe {
         this.score++;
         this.targetsHit++;
         
-        if (this.targetsHit % 5 === 0 && this.currentSpawnRate > 750) {
-            this.currentSpawnRate = Math.max(750, this.currentSpawnRate - 500);
+        if (this.targetsHit % 5 === 0 && this.currentSpawnRate > 500) {
+            this.currentSpawnRate = Math.max(500, this.currentSpawnRate - 500);
         }
         
         this.updateUI();
