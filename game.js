@@ -71,7 +71,7 @@ class BananaJoe {
         this.playerH = this.playerElem.offsetHeight;
         
         // Dynamic step size (speed)
-        this.stepSize = Math.max(0.2, Math.min(this.containerW * 0.0006, 0.5));
+        this.stepSize = Math.max(0.3, Math.min(this.containerW * 0.0006, 0.8));
     }
 
     centerPlayer() {
