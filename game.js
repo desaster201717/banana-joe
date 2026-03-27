@@ -74,10 +74,17 @@ class BananaJoe {
         // Dynamic step size (speed) - Balanced for different screen sizes
         // We want a consistent time to cross the screen across devices.
         // Approx. 1.1 seconds to cross the container width seems to be the sweet spot.
-        this.stepSize = this.containerW / 1100;
+        let targetStepSize = this.containerW / 1100;
+
+        // Slow down on larger screens (PC/iPad) as requested (30% slower)
+        if (window.innerWidth > 600) {
+            targetStepSize *= 0.7;
+        }
+
+        this.stepSize = targetStepSize;
 
         // Ensure a reasonable minimum and maximum speed
-        this.stepSize = Math.max(0.35, Math.min(this.stepSize, 2.2));
+        this.stepSize = Math.max(0.25, Math.min(this.stepSize, 2.2));
     }
 
     centerPlayer() {
@@ -107,6 +114,12 @@ class BananaJoe {
         
         // Fullscreen
         document.getElementById("fullscreen-btn").addEventListener("click", () => this.toggleFullscreen());
+
+        // Listen for standard FS changes to update dimensions
+        document.addEventListener("fullscreenchange", () => this.updateDimensions());
+        document.addEventListener("webkitfullscreenchange", () => this.updateDimensions());
+        document.addEventListener("mozfullscreenchange", () => this.updateDimensions());
+        document.addEventListener("MSFullscreenChange", () => this.updateDimensions());
 
         // Joystick
         this.setupJoystick();
@@ -515,11 +528,6 @@ class BananaJoe {
             }
         }
 
-        // Listen for standard FS changes to update dimensions
-        document.addEventListener("fullscreenchange", () => this.updateDimensions());
-        document.addEventListener("webkitfullscreenchange", () => this.updateDimensions());
-        document.addEventListener("mozfullscreenchange", () => this.updateDimensions());
-        document.addEventListener("MSFullscreenChange", () => this.updateDimensions());
     }
 }
 
