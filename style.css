@@ -107,6 +107,22 @@ body {
     animation: bounce 2s infinite ease-in-out;
 }
 
+.obstacle {
+    width: clamp(35px, 7vw, 55px);
+    height: clamp(35px, 7vw, 55px);
+    position: absolute;
+    background-image: url(https://img.freepik.com/free-photo/rotten-banana_1101-729.jpg);
+    background-size: cover;
+    border-radius: 50%;
+    filter: grayscale(80%) drop-shadow(0 0 8px rgba(0, 0, 0, 0.8));
+    animation: jitter 0.5s infinite alternate;
+}
+
+@keyframes jitter {
+    from { transform: rotate(-2deg); }
+    to { transform: rotate(2deg); }
+}
+
 @keyframes bounce {
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-5px); }
@@ -279,6 +295,23 @@ button {
 #startScreen.visible, #gameOver.visible {
     display: block;
     animation: fadeIn 0.5s ease forwards;
+}
+
+/* Pseudo Fullscreen for iOS */
+body.is-pseudo-fullscreen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 9999;
+    background: black;
+}
+
+body.is-pseudo-fullscreen #container {
+    width: 100vw;
+    height: 100vh;
+    border-radius: 0;
 }
 
 /* Mobile adjustments */
