@@ -284,7 +284,28 @@ button {
 /* Mobile adjustments */
 @media (max-width: 600px) {
     #score { right: 20px; top: 20px; font-size: 24px; }
-    #spawnTime { right: 20px; bottom: 20px; font-size: 14px; }
+    #spawnTime { right: 20px; top: 55px; bottom: auto; font-size: 14px; text-align: right; }
     #startScreen h1 { font-size: 40px; }
-    #container { width: 95%; height: 80%; }
+    #container {
+        width: 98%;
+        height: 90%;
+    }
+    #joystick-zone {
+        right: 15px;
+        bottom: 15px;
+        width: 100px;
+        height: 100px;
+    }
+    #joystick-stick {
+        width: 40px;
+        height: 40px;
+        top: 30px;
+        left: 30px;
+    }
+    #fullscreen-btn {
+        bottom: 15px;
+        left: 15px;
+        padding: 8px 12px;
+        font-size: 14px;
+    }
 }
