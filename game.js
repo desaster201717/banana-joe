@@ -24,6 +24,7 @@ class BananaJoe {
         this.playerName = "";
         this.score = 0;
         this.targets = []; 
+        this.obstacles = [];
         this.isGameOver = false;
         this.isStarted = false;
         
@@ -70,8 +71,11 @@ class BananaJoe {
         this.playerW = this.playerElem.offsetWidth;
         this.playerH = this.playerElem.offsetHeight;
         
-        // Dynamic step size (speed)
-        this.stepSize = Math.max(0.3, Math.min(this.containerW * 0.0006, 1));
+        // Dynamic step size (speed) - Balanced for different screen sizes
+        // On PC (large width), we increase speed to cover distances.
+        // On Mobile (small width), we decrease speed to increase challenge.
+        this.stepSize = 0.22 + (Math.max(0, this.containerW - 400) * 0.0016);
+        this.stepSize = Math.min(this.stepSize, 2.0); // Cap max speed
     }
 
     centerPlayer() {
@@ -86,7 +90,14 @@ class BananaJoe {
             if (!this.isStarted) this.centerPlayer();
         });
 
-        document.addEventListener("keydown", (e) => this.keys[e.code] = true);
+        document.addEventListener("keydown", (e) => {
+            this.keys[e.code] = true;
+            // ESC key to exit pseudo-fullscreen
+            if (e.code === "Escape" && document.body.classList.contains("is-pseudo-fullscreen")) {
+                document.body.classList.remove("is-pseudo-fullscreen");
+                this.updateDimensions();
+            }
+        });
         document.addEventListener("keyup", (e) => this.keys[e.code] = false);
 
         document.getElementById("start-btn").addEventListener("click", () => this.handleStart());
@@ -117,10 +128,12 @@ class BananaJoe {
         this.targetsHit = 0;
         this.currentSpawnRate = 2500;
         this.targets = [];
+        this.obstacles = [];
         this.spawnTimer = 0;
         
-        // Clear targets from DOM if any left
+        // Clear targets & obstacles from DOM
         document.querySelectorAll(".target").forEach(t => t.remove());
+        document.querySelectorAll(".obstacle").forEach(o => o.remove());
         
         this.updateUI();
         this.lastTime = performance.now();
@@ -144,10 +157,10 @@ class BananaJoe {
         let dx = 0;
         let dy = 0;
 
-        if (this.keys["ArrowUp"]) dy -= 1;
-        if (this.keys["ArrowDown"]) dy += 1;
-        if (this.keys["ArrowLeft"]) dx -= 1;
-        if (this.keys["ArrowRight"]) dx += 1;
+        if (this.keys["ArrowUp"] || this.keys["KeyW"]) dy -= 1;
+        if (this.keys["ArrowDown"] || this.keys["KeyS"]) dy += 1;
+        if (this.keys["ArrowLeft"] || this.keys["KeyA"]) dx -= 1;
+        if (this.keys["ArrowRight"] || this.keys["KeyD"]) dx += 1;
 
         // Joystick adds to movement
         dx += this.joystickDeltaX;
@@ -172,6 +185,12 @@ class BananaJoe {
         if (this.spawnTimer >= this.currentSpawnRate) {
             this.spawnTimer = 0;
             this.spawnTarget();
+
+            // Random chance to spawn obstacle based on progress
+            const obstacleChance = Math.min(0.7, 0.1 + (this.score / 50));
+            if (Math.random() < obstacleChance) {
+                this.spawnObstacle();
+            }
         }
 
         // 3. Collision Detection
@@ -220,21 +239,71 @@ class BananaJoe {
         this.updateUI();
     }
 
+    hitObstacle(obstacle, index) {
+        obstacle.elem.remove();
+        this.obstacles.splice(index, 1);
+
+        // Penalty
+        this.score = Math.max(0, this.score - 2);
+
+        // Visual feedback for penalty (optional, can be added to UI)
+        this.scoreDisplay.style.color = "var(--secondary-color)";
+        setTimeout(() => {
+            this.scoreDisplay.style.color = "var(--primary-color)";
+        }, 300);
+
+        this.updateUI();
+    }
+
+    spawnObstacle() {
+        if (this.obstacles.length >= 15) return;
+
+        const obs = {
+            id: Date.now() + Math.random(),
+            x: 0,
+            y: 0,
+            w: 48,
+            h: 48,
+            elem: document.createElement("div")
+        };
+
+        obs.elem.classList.add("obstacle");
+        this.containerElem.appendChild(obs.elem);
+
+        obs.w = obs.elem.offsetWidth;
+        obs.h = obs.elem.offsetHeight;
+
+        const maxL = this.containerW - obs.w - 10;
+        const maxT = this.containerH - obs.h - 10;
+
+        obs.x = Math.floor(Math.random() * maxL) + 5;
+        obs.y = Math.floor(Math.random() * maxT) + 5;
+
+        obs.elem.style.left = `${obs.x}px`;
+        obs.elem.style.top = `${obs.y}px`;
+
+        this.obstacles.push(obs);
+    }
+
     checkCollisions() {
         const px1 = this.playerX;
         const py1 = this.playerY;
         const px2 = px1 + this.playerW;
         const py2 = py1 + this.playerH;
 
+        // 1. Check Targets
         for (let i = this.targets.length - 1; i >= 0; i--) {
             const t = this.targets[i];
-            const tx1 = t.x;
-            const ty1 = t.y;
-            const tx2 = tx1 + t.w;
-            const ty2 = ty1 + t.h;
-
-            if (px1 < tx2 && px2 > tx1 && py1 < ty2 && py2 > ty1) {
+            if (px1 < t.x + t.w && px2 > t.x && py1 < t.y + t.h && py2 > t.y) {
                 this.collectTarget(t, i);
+            }
+        }
+
+        // 2. Check Obstacles
+        for (let i = this.obstacles.length - 1; i >= 0; i--) {
+            const o = this.obstacles[i];
+            if (px1 < o.x + o.w && px2 > o.x && py1 < o.y + o.h && py2 > o.y) {
+                this.hitObstacle(o, i);
             }
         }
     }
@@ -246,8 +315,9 @@ class BananaJoe {
         this.score++;
         this.targetsHit++;
         
-        if (this.targetsHit % 5 === 0 && this.currentSpawnRate > 500) {
-            this.currentSpawnRate = Math.max(500, this.currentSpawnRate - 500);
+        // Progressive difficulty increase
+        if (this.targetsHit % 4 === 0 && this.currentSpawnRate > 350) {
+            this.currentSpawnRate = Math.max(350, this.currentSpawnRate - 400);
         }
         
         this.updateUI();
@@ -394,6 +464,16 @@ class BananaJoe {
     }
 
     toggleFullscreen() {
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+
+        // Use Pseudo-Fullscreen for iOS or Safari if needed
+        if (isIOS || isSafari) {
+            document.body.classList.toggle("is-pseudo-fullscreen");
+            this.updateDimensions();
+            return;
+        }
+
         const doc = document.documentElement;
         const fsElement = document.fullscreenElement ||
                          document.webkitFullscreenElement ||
@@ -402,13 +482,20 @@ class BananaJoe {
 
         if (!fsElement) {
             if (doc.requestFullscreen) {
-                doc.requestFullscreen().catch(e => console.log(e));
+                doc.requestFullscreen().catch(e => {
+                    // Fallback for browsers that fail
+                    document.body.classList.add("is-pseudo-fullscreen");
+                    this.updateDimensions();
+                });
             } else if (doc.webkitRequestFullscreen) {
                 doc.webkitRequestFullscreen();
             } else if (doc.mozRequestFullScreen) {
                 doc.mozRequestFullScreen();
             } else if (doc.msRequestFullscreen) {
                 doc.msRequestFullscreen();
+            } else {
+                // Total fallback
+                document.body.classList.toggle("is-pseudo-fullscreen");
             }
         } else {
             if (document.exitFullscreen) {
@@ -421,6 +508,12 @@ class BananaJoe {
                 document.msExitFullscreen();
             }
         }
+
+        // Listen for standard FS changes to update dimensions
+        document.addEventListener("fullscreenchange", () => this.updateDimensions());
+        document.addEventListener("webkitfullscreenchange", () => this.updateDimensions());
+        document.addEventListener("mozfullscreenchange", () => this.updateDimensions());
+        document.addEventListener("MSFullscreenChange", () => this.updateDimensions());
     }
 }
 
